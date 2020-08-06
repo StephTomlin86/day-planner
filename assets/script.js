@@ -1,5 +1,5 @@
-// variable that will store and loop through calendar
-var myDay = [
+//variable that will store and loop through calendar
+var myDayArray = [
   {
     id: "0",
     hour: "09",
@@ -64,40 +64,16 @@ var myDay = [
     reminder: "",
   },
 ];
-
-// gets data for the header date
+localStorage.setItem("myDay", JSON.stringify(myDayArray));
+let myDay = JSON.parse(localStorage.getItem("myDay"));
+console.log(myDayArray);
+console.log(myDay);
+// gets and loads data for the header date
 function getHeaderDate() {
   var currentHeaderDate = moment().format("dddd, MMMM Do");
   $("#currentDay").text(currentHeaderDate);
 }
-
-// saves data to localStorage
-function saveReminders() {
-  localStorage.setItem("myDay", JSON.stringify(myDay));
-}
-
-// sets any data in localStorage to the view
-function displayReminders() {
-  myDay.forEach(function (_thisHour) {
-    $(`#${_thisHour.id}`).val(_thisHour.reminder);
-  });
-}
-
-// sets any existing localStorage data to the view if it exists
-function init() {
-  var storedDay = JSON.parse(localStorage.getItem("myDay"));
-
-  if (storedDay) {
-    myDay = storedDay;
-  }
-
-  saveReminders();
-  displayReminders();
-}
-
-// loads header date
 getHeaderDate();
-
 // creates the visuals for the scheduler body
 myDay.forEach(function (thisHour) {
   // creates timeblocks row
@@ -105,19 +81,31 @@ myDay.forEach(function (thisHour) {
     class: "row",
   });
   $(".container").append(hourRow);
-
   // creates time field
   var hourField = $("<div>").text(`${thisHour.hour}${thisHour.meridiem}`).attr({
     class: "col-md-2 hour",
   });
-
   // creates schdeduler data
   var hourPlan = $("<div>").attr({
     class: "col-md-9 description p-0",
   });
-  var planData = $("<textarea>");
+  //input field
+  var planData = $("<input/>");
   hourPlan.append(planData);
-  planData.attr("id", thisHour.id);
+  planData.attr("type", "text");
+  planData.attr("id", "input");
+  //onclick
+  $(".saveBtn").click(function (event) {
+    event.preventDefault();
+    //  let dayIndex = $(this).attr("id");
+    let reminderValue = $("#input").val();
+    //  myDay[dayIndex].reminder = reminderValue;
+    //  console.log(dayIndex);
+    //  console.log(thisHour.reminder);
+    console.log(reminderValue);
+    localStorage.setItem("myDay", JSON.stringify(myDay));
+  });
+  //changes color
   if (thisHour.time < moment().format("HH")) {
     planData.attr({
       class: "past",
@@ -131,31 +119,11 @@ myDay.forEach(function (thisHour) {
       class: "present",
     });
   }
-
   // creates save button
   var saveButton = $("<i class='far fa-save fa-lg'></i>");
-  var savePlan = $("<button>").attr({
-    class: "col-md-1 saveBtn",
-  });
+  var savePlan = $("<button>").attr({ class: "col-md-1 saveBtn" });
+  saveButton.attr("id", `${thisHour.id}`);
   savePlan.append(saveButton);
   hourRow.append(hourField, hourPlan, savePlan);
-});
-
-// loads any existing localstorage data after components created
-init();
-
-// saves data to be used in localStorage
-$(".saveBtn").on("click", function (event) {
-  event.preventDefault();
-  var saveIndex = $(this)
-    .siblings(".description")
-    .children(".future")
-    .attr("id");
-  myDay[saveIndex].reminder = $(this)
-    .siblings(".description")
-    .children(".future")
-    .val();
-  console.log(saveIndex);
-  saveReminders();
-  displayReminders();
+  console.log(saveButton.id);
 });
